@@ -1,0 +1,235 @@
+You are a senior full-stack SaaS engineer.
+
+TASK:
+Upgrade the existing hybrid deal website (Vipon-style + Koupon-style) by adding a complete "Paste Product Link → Autofill Deal" system, including scraping + AI rewriting, built for production use.
+
+This feature must allow an admin to paste a product URL (Amazon, Walmart, Target, Shopify stores, etc.) and automatically populate the deal creation form with product data.
+
+The system must also integrate AI rewriting to generate a clean high-converting deal description, SEO metadata, tags, and category suggestions.
+
+IMPORTANT:
+- This must be fully functional end-to-end.
+- Do NOT leave core features as TODO.
+- Provide complete working code with exact file paths.
+- Must run in Replit.
+- Use safe scraping practices and fallbacks.
+- Admin-only access.
+
+------------------------------------------------------------
+FEATURE REQUIREMENTS
+------------------------------------------------------------
+
+1) ADMIN UI FEATURE (Deal Create/Edit Page)
+On /admin/deals/new and /admin/deals/[id]/edit:
+
+Add a new panel at the top:
+
+"Autofill Deal From Product Link"
+
+Components:
+- URL input field
+- Button: "Fetch Product Info"
+- Loading spinner
+- Output preview card showing fetched:
+  - product title
+  - product image
+  - price
+  - brand (if available)
+  - short extracted description
+
+After fetching, automatically populate the deal form fields.
+
+Add another button:
+- "AI Rewrite + Generate Deal Content"
+
+This button should:
+- Generate a high-converting deal description
+- Generate bullet points
+- Generate SEO title + meta description
+- Suggest category + tags
+- Suggest slug
+- Generate social captions
+
+Allow admin to accept or edit results.
+
+------------------------------------------------------------
+2) BACKEND SCRAPER SERVICE
+------------------------------------------------------------
+
+Create an internal scraping utility that supports:
+
+Input:
+- product URL
+
+Output:
+{
+  "title": "...",
+  "imageUrl": "...",
+  "price": 0.00,
+  "originalPrice": 0.00,
+  "brand": "...",
+  "description": "...",
+  "source": "amazon|shopify|generic",
+  "success": true/false
+}
+
+Implementation details:
+- Use fetch + cheerio for HTML parsing.
+- Detect Amazon pages and parse:
+  - title (#productTitle)
+  - price (#priceblock_ourprice or other variants)
+  - image (#landingImage or meta og:image)
+- Detect Shopify pages by checking for:
+  - JSON-LD Product schema
+  - meta tags
+- For generic sites, use:
+  - OpenGraph meta tags (og:title, og:image, og:description)
+  - JSON-LD Product schema if present
+- If price not found, return null.
+
+Anti-blocking:
+- Use realistic headers (user-agent, accept-language)
+- Implement retry logic
+- Timeout after reasonable seconds
+- Handle failures gracefully
+
+SECURITY:
+- Only allow http/https URLs
+- Block internal IP ranges / localhost URLs
+- Prevent SSRF attacks
+- Validate URL domain and sanitize input
+
+------------------------------------------------------------
+3) API ROUTES
+------------------------------------------------------------
+
+Create these protected API endpoints:
+
+A) POST /api/admin/scrape-product
+- Admin-only
+- Input: { "url": "https://..." }
+- Output: scraped product data JSON
+- Validate with Zod
+
+B) POST /api/admin/ai-autofill
+- Admin-only
+- Input: { dealData: { title, url, category, prices, etc } }
+- Output: AI-generated deal content JSON
+- Uses OpenAI API
+- Strict JSON output only
+- Log requests
+
+------------------------------------------------------------
+4) AI INTEGRATION
+------------------------------------------------------------
+
+Use OpenAI API with env var OPENAI_API_KEY.
+
+Model: gpt-4o-mini (or best cost-effective model available)
+
+AI must generate:
+
+- clean deal description (150-250 words)
+- bullet points (5-8)
+- SEO title (max 60 chars)
+- meta description (max 155 chars)
+- tags (10)
+- category suggestion (must match one of DB categories)
+- slug suggestions (3)
+- urgency hook (1 short sentence)
+- 5 social captions
+- 3 TikTok/Reels short scripts
+
+AI OUTPUT MUST BE STRICT JSON:
+
+{
+  "description": "...",
+  "bullets": ["...", "..."],
+  "seoTitle": "...",
+  "metaDescription": "...",
+  "tags": ["...", "..."],
+  "categorySlug": "...",
+  "slugSuggestions": ["...", "..."],
+  "hook": "...",
+  "socialCaptions": ["...", "..."],
+  "shortVideoScripts": ["...", "..."]
+}
+
+AI PROMPT RULES:
+- No markdown
+- No commentary
+- No extra keys
+- No extra text outside JSON
+
+------------------------------------------------------------
+5) DATABASE UPDATES
+------------------------------------------------------------
+
+Add Deal fields if missing:
+- seoTitle
+- metaDescription
+- tags (Json)
+- brand (String?)
+
+Add new model:
+
+model ScrapeLog {
+  id        String   @id @default(cuid())
+  userId    String
+  url       String
+  success   Boolean
+  source    String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+}
+
+Log every scrape attempt.
+
+------------------------------------------------------------
+6) ADMIN EXPERIENCE IMPROVEMENTS
+------------------------------------------------------------
+
+After scrape success:
+- Auto-fill title, imageUrl, originalPrice, dealPrice, affiliateLink/productLink.
+- Show preview card with extracted info.
+- Allow "Use This Data" button.
+
+After AI generation:
+- Auto-fill description, seoTitle, metaDescription, tags.
+- Provide "Copy to clipboard" options.
+
+Add "Clone Deal" button:
+- Duplicates an existing deal (same layout)
+- Admin only changes promo code, expiration date, affiliate link
+
+------------------------------------------------------------
+7) RATE LIMITING + SECURITY
+------------------------------------------------------------
+
+- Rate limit scraping per admin per minute
+- Rate limit AI generation per admin per minute
+- Validate all payloads with Zod
+- Ensure only ADMIN role can access endpoints
+- Prevent prompt injection by only sending structured fields to AI
+
+------------------------------------------------------------
+8) DELIVERABLES
+------------------------------------------------------------
+
+Provide complete working implementation with:
+- updated Prisma schema
+- migrations instructions
+- scraping utility module
+- API routes
+- updated admin UI components
+- form autofill logic
+- error handling and success notifications
+- environment variable example (.env.example)
+- testing instructions
+
+No partial code. No TODO placeholders.
+
+Now implement the full "Paste Link → Autofill + AI Rewrite" system in this project.

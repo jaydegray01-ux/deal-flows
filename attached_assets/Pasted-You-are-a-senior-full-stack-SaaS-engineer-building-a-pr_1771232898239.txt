@@ -1,0 +1,191 @@
+You are a senior full-stack SaaS engineer building a production-ready hybrid deal website (Vipon-style + Koupon-style) as a Replit project.
+
+GOAL:
+Create a deal platform where admins post deals. Users browse deals. Each deal has a “Reveal Code / Get Deal” button that unlocks a promo code and redirects users through a tracked affiliate/product link. The platform supports two deal types:
+1) OPEN AFFILIATE DEALS (no slots, no login required)
+2) EXCLUSIVE SLOT DEALS (limited claims; login required)
+
+IMPORTANT:
+- Do NOT output partial snippets. Generate a complete working app.
+- Provide full folder structure, full code files, and setup steps.
+- Build the MVP first, then include slot deals (hybrid), admin, SEO pages, analytics, and anti-abuse.
+- Use clean, readable code and production-ready patterns.
+- Everything must run on Replit.
+
+TECH STACK (REPLIT-FRIENDLY):
+- Next.js (App Router) + TypeScript
+- TailwindCSS
+- Prisma ORM
+- PostgreSQL (use Replit Postgres if available; otherwise Neon)
+- NextAuth for authentication (Credentials for admin + optional user accounts)
+- Zod validation
+- Rate limiting for claim endpoints
+
+APP REQUIREMENTS:
+
+1) PUBLIC PAGES
+A) Homepage "/"
+- Above-the-fold: headline + CTA "View Today’s Top Deals"
+- Sections:
+  - Trending Deals (sorted by click count last 7 days)
+  - Limited-Time Exclusives (slot deals + ending soon)
+  - Categories grid (each shows 3 deals + "View All")
+  - Email capture section (store emails in DB)
+  - Recently Added
+- Must be fast and mobile-first
+
+B) Deal listing page "/deals"
+- Filters:
+  - Category
+  - Deal type (affiliate | slot)
+  - Discount range
+  - Sort (newest | trending | ending soon)
+- Paginated
+
+C) Deal detail page "/deals/[slug]"
+- SSR/SEO optimized
+- Shows:
+  - product title, images, discount, prices
+  - description
+  - badges: type + expiry
+  - CTA button: "Reveal Code"
+  - related deals
+- Structured data (JSON-LD Product schema)
+- Meta tags (title/description/open graph)
+
+D) Category page "/c/[categorySlug]"
+- SEO text block (short, helpful)
+- Deals list + sorting
+
+2) DEAL TYPES + BUTTON LOGIC
+
+A) OPEN AFFILIATE DEAL
+- No login required
+- On "Reveal Code":
+  1) open modal showing promo code (if exists)
+  2) log click event (dealId, optional userId, ip, userAgent)
+  3) redirect to tracked outbound route "/out/[dealId]" which then redirects to affiliateLink
+- If no promo code, button label becomes "Get Deal" and still redirects after logging click.
+
+B) EXCLUSIVE SLOT DEAL
+- Login REQUIRED
+- On "Get Code":
+  1) verify authenticated user
+  2) ensure deal status is ACTIVE and not expired
+  3) ensure remainingSlots > 0
+  4) ensure user has not claimed this deal before
+  5) create Claim record and decrement remainingSlots atomically in a transaction
+  6) reveal promo code + redirect link
+- If remainingSlots == 0: show "Sold Out"
+- Deal never auto-detects code failure; add "Report Code Not Working" and admin can mark status.
+
+3) ADMIN DASHBOARD (PROTECTED)
+Route group "/admin"
+- Admin authentication required
+- Pages:
+  - /admin/deals (table list + search + filters + status)
+  - /admin/deals/new (create form)
+  - /admin/deals/[id]/edit (edit form)
+  - /admin/reports (code-not-working reports list)
+  - /admin/analytics (simple charts: clicks/day, claims/day, top deals)
+- Admin can set:
+  - Deal type: affiliate | slot
+  - Title, slug (auto-generate + edit)
+  - Images (store URL; include simple upload option if possible)
+  - Description (basic rich text or markdown)
+  - Category
+  - DiscountPercent, OriginalPrice, DealPrice
+  - PromoCode
+  - AffiliateLink/ProductURL
+  - ExpirationDate
+  - isFeatured
+  - status: ACTIVE | EXPIRED | SOLD_OUT | FLAGGED | DISABLED
+  - For slot deals: totalSlots and remainingSlots
+- Admin action buttons:
+  - Mark Sold Out
+  - Mark Expired
+  - Disable
+  - Adjust slots
+  - Resolve reports
+
+4) DATABASE (PRISMA) — REQUIRED MODELS
+Design and implement Prisma schema with indexes and relations:
+
+- User (id, email, passwordHash (if creds), role: ADMIN|USER, createdAt)
+- Category (id, name, slug)
+- Deal (
+    id, type (AFFILIATE|SLOT),
+    title, slug (unique),
+    description,
+    imageUrl,
+    originalPrice (Decimal?), dealPrice (Decimal?), discountPercent (Int?),
+    promoCode (String?),
+    affiliateLink (String),
+    expirationDate (DateTime?),
+    status (ACTIVE|EXPIRED|SOLD_OUT|FLAGGED|DISABLED),
+    isFeatured (Boolean),
+    totalSlots (Int?), remainingSlots (Int?),
+    createdAt, updatedAt,
+    categoryId (FK)
+  )
+- Click (id, dealId, userId nullable, ip, userAgent, createdAt) + index(dealId, createdAt)
+- Claim (id, dealId, userId, ip, createdAt) + unique(userId, dealId)
+- Favorite (id, dealId, userId) + unique(userId, dealId)
+- Report (id, dealId, userId nullable, reason, createdAt, resolvedAt nullable)
+- EmailSubscriber (id, email unique, createdAt)
+
+5) API ROUTES / SERVER ACTIONS
+Implement secure endpoints or server actions:
+- GET deals (filters, pagination)
+- GET deal by slug
+- POST click log
+- POST claim slot deal (transaction, rate limited)
+- POST report code issue
+- POST subscribe email
+- Admin CRUD endpoints for deals/categories
+- Outbound redirect route /out/[dealId] that logs + redirects safely
+
+6) ANTI-ABUSE + SECURITY
+- Rate limit claim endpoints (per IP + per user)
+- Validate inputs with Zod
+- Prevent open redirects (only redirect to stored affiliateLink)
+- Use HTTP-only cookies for auth (NextAuth)
+- Add basic bot protection on claim route (simple CAPTCHA optional)
+- Sanitize rich text/markdown rendering
+
+7) UI COMPONENTS (TAILWIND)
+- DealCard component:
+  - image, title, discount, badges, expiry, slots left (if slot deal), CTA button
+- RevealCodeModal component
+- Filters component
+- Pagination component
+- AdminTable component
+- StatusBadge component
+
+8) SEO + PERFORMANCE
+- Server-render key pages
+- Generate sitemap.xml and robots.txt
+- Add JSON-LD Product schema on deal detail pages
+- Use next/image
+- Cache where appropriate
+
+DELIVERABLES (MUST OUTPUT):
+1) Full folder structure
+2) All code files with exact paths and contents
+3) Prisma schema and migration instructions
+4) .env.example with required variables
+5) Seed script to create:
+   - Admin user
+   - Sample categories
+   - Sample deals (affiliate + slot)
+6) Replit run instructions:
+   - install deps
+   - prisma generate/migrate
+   - start dev server
+
+IMPLEMENTATION CONSTRAINTS:
+- Make it work end-to-end (browse, reveal code, outbound redirect, admin create deals, slot claims).
+- Prefer built-in Replit-compatible solutions.
+- No placeholder “TODO” for core functionality.
+
+Now produce the complete project.

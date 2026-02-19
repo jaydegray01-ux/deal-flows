@@ -1,0 +1,251 @@
+You are a senior full-stack SaaS engineer.
+
+TASK:
+Upgrade the existing hybrid deal platform by implementing:
+
+1) "Worked / Didn’t Work" voting system for deals
+2) Referral system with personal referral links
+3) Bi-weekly $25 raffle entry system based on referrals
+4) Admin raffle draw functionality
+
+Must be production-ready, secure, and Replit compatible.
+Do NOT leave TODO placeholders.
+Provide full code with file paths.
+
+==================================================
+PART 1 — WORKED / DIDN’T WORK VOTING SYSTEM
+==================================================
+
+GOAL:
+Allow users (or IP-based anonymous users) to vote:
+- 👍 Worked
+- 👎 Didn’t Work
+
+Only one vote per deal per user OR per IP.
+
+--------------------------------------------------
+DATABASE UPDATES (Prisma)
+--------------------------------------------------
+
+Add this model:
+
+model DealVote {
+  id        String   @id @default(cuid())
+  dealId    String
+  userId    String?
+  ip        String?
+  voteType  VoteType
+  createdAt DateTime @default(now())
+
+  deal Deal @relation(fields: [dealId], references: [id])
+  user User? @relation(fields: [userId], references: [id])
+
+  @@unique([dealId, userId])
+  @@index([dealId])
+}
+
+enum VoteType {
+  WORKED
+  FAILED
+}
+
+--------------------------------------------------
+API ROUTE
+--------------------------------------------------
+
+POST /api/deals/[dealId]/vote
+
+Input:
+{
+  voteType: "WORKED" | "FAILED"
+}
+
+Logic:
+- Get user session
+- Get IP address
+- If logged in:
+    Prevent duplicate vote by userId + dealId
+- If not logged in:
+    Prevent duplicate vote by IP + dealId
+- Create vote
+- Return updated counts:
+    {
+      workedCount,
+      failedCount,
+      failRate
+    }
+
+--------------------------------------------------
+DEAL PAGE UI
+--------------------------------------------------
+
+Under promo code section add:
+
+👍 Worked (X)
+👎 Didn’t Work (Y)
+
+If failRate > 0.4:
+Show warning:
+⚠️ This code may no longer be valid.
+
+Add loading state + disable after voting.
+
+==================================================
+PART 2 — REFERRAL SYSTEM
+==================================================
+
+GOAL:
+Each registered user gets a personal referral link:
+
+Example:
+https://yoursite.com/?ref=USER_REF_CODE
+
+When someone signs up through that link:
+- Referral is tracked
+- Referrer gets 1 raffle entry
+
+==================================================
+DATABASE UPDATES
+==================================================
+
+Add to User model:
+
+referralCode String @unique
+referredById String?
+referredBy   User? @relation("UserReferrals", fields: [referredById], references: [id])
+referrals    User[] @relation("UserReferrals")
+
+Add raffle model:
+
+model RaffleEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([createdAt])
+}
+
+--------------------------------------------------
+REFERRAL FLOW
+--------------------------------------------------
+
+1) On user registration:
+   - Generate unique referralCode (random 8 char string)
+   - If URL contains ?ref=CODE:
+        Find user by referralCode
+        Set referredById
+        Create RaffleEntry for referrer
+
+2) Only count:
+   - First valid signup
+   - Prevent self-referral
+   - Prevent duplicate accounts via same IP (basic check)
+
+--------------------------------------------------
+USER DASHBOARD SECTION
+--------------------------------------------------
+
+Add section:
+"My Referral Link"
+
+Display:
+https://yoursite.com/?ref=USER_REF_CODE
+
+Show:
+- Total referrals
+- Total raffle entries
+- Next raffle draw date
+
+==================================================
+PART 3 — BI-WEEKLY $25 RAFFLE SYSTEM
+==================================================
+
+GOAL:
+Every 14 days, admin can draw 1 winner from RaffleEntry table.
+
+--------------------------------------------------
+ADMIN ENDPOINT
+--------------------------------------------------
+
+POST /api/admin/raffle/draw
+
+Admin only.
+
+Logic:
+- Get all RaffleEntry records created in last 14 days
+- Randomly select 1
+- Store winner in new model:
+
+model RaffleWinner {
+  id        String   @id @default(cuid())
+  userId    String
+  drawnAt   DateTime @default(now())
+  periodStart DateTime
+  periodEnd   DateTime
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+- Delete raffle entries from that 14-day period after draw
+
+Return:
+{
+  winnerEmail,
+  winnerReferralCount
+}
+
+--------------------------------------------------
+SECURITY RULES
+--------------------------------------------------
+
+- Only logged-in users get referral codes
+- One raffle entry per successful referred signup
+- Prevent fake referrals via:
+    - same IP multiple accounts
+    - disposable emails (basic domain check)
+- Admin role required to draw raffle
+- Log raffle draws
+
+==================================================
+FRONTEND ADDITIONS
+==================================================
+
+1) Referral tracking:
+In root layout:
+- Read ?ref= param
+- Store in cookie for 7 days
+
+2) On signup:
+- Read referral cookie
+- Attach to new user
+
+3) Add dashboard page:
+app/dashboard/page.tsx
+
+Sections:
+- Referral link
+- Total referrals
+- Raffle entries
+- Next draw countdown
+
+==================================================
+DELIVERABLES REQUIRED
+==================================================
+
+- Updated Prisma schema
+- Migration instructions
+- API routes
+- Deal page voting UI
+- Referral tracking middleware
+- Raffle draw admin endpoint
+- Dashboard page
+- Secure validation with Zod
+- Rate limiting on vote + referral endpoints
+
+No partial code.
+No TODO placeholders.
+Fully working implementation.
+
+Now implement the full voting + referral + raffle system.

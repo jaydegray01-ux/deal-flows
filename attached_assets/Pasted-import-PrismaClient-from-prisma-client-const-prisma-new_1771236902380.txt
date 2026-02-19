@@ -1,0 +1,142 @@
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
+
+const categories = [
+  {
+    name: "Electronics",
+    slug: "electronics",
+    children: [
+      { name: "Phone Accessories", slug: "phone-accessories" },
+      { name: "Headphones", slug: "headphones" },
+      { name: "Smart Home", slug: "smart-home" },
+      { name: "Computers & Tablets", slug: "computers-tablets" },
+      { name: "Gaming Accessories", slug: "gaming-accessories" },
+    ],
+  },
+  {
+    name: "Home & Kitchen",
+    slug: "home-kitchen",
+    children: [
+      { name: "Kitchen Appliances", slug: "kitchen-appliances" },
+      { name: "Cleaning Tools", slug: "cleaning-tools" },
+      { name: "Home Decor", slug: "home-decor" },
+      { name: "Storage & Organization", slug: "storage-organization" },
+    ],
+  },
+  {
+    name: "Beauty",
+    slug: "beauty",
+    children: [
+      { name: "Skincare", slug: "skincare" },
+      { name: "Makeup", slug: "makeup" },
+      { name: "Hair Care", slug: "hair-care" },
+      { name: "Grooming", slug: "grooming" },
+    ],
+  },
+  {
+    name: "Health & Fitness",
+    slug: "health-fitness",
+    children: [
+      { name: "Supplements", slug: "supplements" },
+      { name: "Workout Equipment", slug: "workout-equipment" },
+      { name: "Recovery Tools", slug: "recovery-tools" },
+    ],
+  },
+  {
+    name: "Fashion",
+    slug: "fashion",
+    children: [
+      { name: "Men's Fashion", slug: "mens-fashion" },
+      { name: "Women's Fashion", slug: "womens-fashion" },
+      { name: "Shoes", slug: "shoes" },
+      { name: "Watches & Accessories", slug: "watches-accessories" },
+    ],
+  },
+  {
+    name: "Toys & Games",
+    slug: "toys-games",
+    children: [
+      { name: "Kids Toys", slug: "kids-toys" },
+      { name: "Board Games", slug: "board-games" },
+      { name: "Video Games", slug: "video-games" },
+    ],
+  },
+  {
+    name: "Baby",
+    slug: "baby",
+    children: [
+      { name: "Diapers & Wipes", slug: "diapers-wipes" },
+      { name: "Feeding", slug: "feeding" },
+      { name: "Baby Gear", slug: "baby-gear" },
+    ],
+  },
+  {
+    name: "Office & School",
+    slug: "office-school",
+    children: [
+      { name: "Desk Accessories", slug: "desk-accessories" },
+      { name: "School Supplies", slug: "school-supplies" },
+    ],
+  },
+  {
+    name: "Automotive",
+    slug: "automotive",
+    children: [
+      { name: "Car Accessories", slug: "car-accessories" },
+      { name: "Tools & Equipment", slug: "tools-equipment" },
+    ],
+  },
+  {
+    name: "Pet Supplies",
+    slug: "pet-supplies",
+    children: [
+      { name: "Dog Supplies", slug: "dog-supplies" },
+      { name: "Cat Supplies", slug: "cat-supplies" },
+      { name: "Pet Grooming", slug: "pet-grooming" },
+    ],
+  },
+];
+
+async function main() {
+  console.log("Seeding categories...");
+
+  for (const cat of categories) {
+    const parent = await prisma.category.upsert({
+      where: { slug: cat.slug },
+      update: { name: cat.name },
+      create: {
+        name: cat.name,
+        slug: cat.slug,
+      },
+    });
+
+    if (cat.children && cat.children.length > 0) {
+      for (const child of cat.children) {
+        await prisma.category.upsert({
+          where: { slug: child.slug },
+          update: {
+            name: child.name,
+            parentId: parent.id,
+          },
+          create: {
+            name: child.name,
+            slug: child.slug,
+            parentId: parent.id,
+          },
+        });
+      }
+    }
+  }
+
+  console.log("Categories seeded successfully.");
+}
+
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

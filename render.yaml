@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: deal-flow
+    env: node
+    plan: free
+    buildCommand: npm install --no-fund --no-audit && npm run build
+    startCommand: npm run start
+    autoDeploy: true
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: deal-flow-db
+          property: connectionString
+
+databases:
+  - name: deal-flow-db
+    plan: free

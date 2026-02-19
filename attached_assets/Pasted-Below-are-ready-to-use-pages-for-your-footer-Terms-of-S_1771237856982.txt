@@ -1,0 +1,215 @@
+Below are ready-to-use pages for your footer:
+	•	Terms of Service
+	•	Privacy Policy
+	•	About Us
+	•	Contact Us
+	•	Affiliate Disclosure (included properly for Amazon + FTC compliance)
+
+Replace placeholders like [YourSiteName], [YourEmail], and [Effective Date].
+
+⸻
+
+TERMS OF SERVICE
+
+Effective Date: [Insert Date]
+Website: [YourSiteName.com]
+
+1. Acceptance of Terms
+
+By accessing and using this website, you agree to be bound by these Terms of Service. If you do not agree, do not use this site.
+
+⸻
+
+2. Nature of the Website
+
+[YourSiteName] is a deal and coupon platform that aggregates and promotes promotional offers from third-party merchants.
+
+We do not sell products directly. All purchases are completed on third-party websites.
+
+⸻
+
+3. Affiliate Disclosure
+
+Some links on this website are affiliate links. This means we may earn a commission if you click a link and make a purchase, at no additional cost to you.
+
+As an Amazon Associate, we earn from qualifying purchases.
+
+We may also participate in other affiliate programs including but not limited to ShareASale, Impact, CJ Affiliate, and other merchant programs.
+
+⸻
+
+4. Deal Accuracy
+
+We attempt to ensure all deals and promo codes are accurate. However:
+	•	Prices may change without notice.
+	•	Promo codes may expire.
+	•	Availability may vary.
+	•	We do not guarantee that any code or offer will work.
+
+We are not responsible for pricing errors or expired promotions.
+
+⸻
+
+5. User Conduct
+
+You agree not to:
+	•	Attempt to exploit limited-claim deals.
+	•	Abuse promo codes.
+	•	Use bots or automated systems.
+	•	Attempt unauthorized access to admin areas.
+	•	Scrape or copy site content without permission.
+
+We reserve the right to restrict or terminate access for abuse.
+
+⸻
+
+6. Limitation of Liability
+
+[YourSiteName] is not responsible for:
+	•	Third-party product quality.
+	•	Shipping delays.
+	•	Refund issues.
+	•	Damages resulting from purchases made via third-party sites.
+
+All transactions occur between you and the merchant.
+
+⸻
+
+7. Modifications
+
+We may update these Terms at any time. Continued use of the site constitutes acceptance of the updated Terms.
+
+⸻
+
+PRIVACY POLICY
+
+Effective Date: [Insert Date]
+
+1. Information We Collect
+
+We may collect:
+	•	Email address (if you subscribe)
+	•	IP address
+	•	Browser type
+	•	Device information
+	•	Pages viewed
+	•	Click data
+	•	Claim history (if account-based features exist)
+
+⸻
+
+2. How We Use Information
+
+We use collected data to:
+	•	Track deal performance
+	•	Improve user experience
+	•	Send newsletters (if subscribed)
+	•	Prevent fraud or abuse
+	•	Analyze traffic and trends
+
+⸻
+
+3. Affiliate Tracking
+
+When you click a deal link, tracking cookies may be set by third-party affiliate networks to record referrals and commissions.
+
+We do not control third-party tracking technologies.
+
+⸻
+
+4. Cookies
+
+We may use cookies to:
+	•	Remember user preferences
+	•	Analyze traffic
+	•	Improve performance
+
+You may disable cookies in your browser settings.
+
+⸻
+
+5. Third-Party Services
+
+We may use:
+	•	Google Analytics
+	•	Affiliate networks
+	•	Email marketing platforms
+	•	Hosting providers
+
+These services may collect data according to their own privacy policies.
+
+⸻
+
+6. Data Security
+
+We implement reasonable security measures but cannot guarantee absolute security.
+
+⸻
+
+7. Your Rights
+
+Depending on your jurisdiction, you may have rights to:
+	•	Access your data
+	•	Request deletion
+	•	Opt out of marketing emails
+
+To request changes, contact: [YourEmail]
+
+⸻
+
+AFFILIATE DISCLOSURE (Footer Link Recommended)
+
+This website contains affiliate links. If you purchase through these links, we may earn a commission at no additional cost to you.
+
+As an Amazon Associate, we earn from qualifying purchases.
+
+We only promote products we believe offer value. However, users should conduct their own research before making purchases.
+
+⸻
+
+ABOUT US
+
+[YourSiteName] was created to help shoppers find the best deals, promo codes, and limited-time discounts online.
+
+Our mission is simple:
+	•	Surface real discounts
+	•	Highlight trending offers
+	•	Provide exclusive limited promotions
+	•	Save shoppers time and money
+
+We aggregate deals across multiple categories including electronics, home, beauty, fashion, and more.
+
+We are not a retailer. All purchases are completed on third-party merchant websites.
+
+⸻
+
+CONTACT US
+
+For general inquiries:
+
+Email: [YourEmail]
+
+For brand partnerships and featured placements:
+
+Email: [YourEmail]
+
+For reporting expired or invalid promo codes:
+
+Use the “Report” feature on the deal page or email us directly.
+
+We aim to respond within 48 business hours.
+
+⸻
+
+OPTIONAL: FTC COMPLIANCE NOTICE (Short Footer Version)
+
+You may also place this short version in your footer:
+
+“Disclosure: This site contains affiliate links. We may earn a commission if you purchase through our links. As an Amazon Associate, we earn from qualifying purchases.”
+
+⸻
+
+If you want, I can now:
+	•	Add GDPR-compliant cookie banner text
+	•	Generate a California CCPA addendum
+	•	Or tailor this for LLC protection language

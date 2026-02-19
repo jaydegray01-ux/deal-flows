@@ -1,0 +1,291 @@
+You are a senior full-stack SaaS engineer.
+
+TASK:
+Upgrade the existing hybrid deal website (Vipon-style + Koupon-style) by adding a complete AI Content Assistant system inside the Admin Dashboard.
+
+The AI system must help admins automatically generate and rewrite:
+- Deal descriptions
+- SEO titles + meta descriptions
+- Category page intro text
+- Bullet point benefits
+- Deal hooks / urgency copy
+- Social media captions (TikTok/Reels/YouTube Shorts)
+- Email blast copy
+- Push notification copy
+- Suggested tags + keywords
+- Suggested category
+- Slug suggestions
+
+The AI must be accessible as buttons inside the Admin Deal Create/Edit page.
+
+IMPORTANT RULES:
+- This must be fully functional end-to-end.
+- Use OpenAI API (recommended) with environment variables.
+- Do not leave core functionality as TODO.
+- Validate inputs and prevent abuse.
+- Admin-only access.
+
+------------------------------------------------------------
+AI FEATURES REQUIRED
+------------------------------------------------------------
+
+1) AI Deal Description Generator
+Input:
+- product title
+- discount %
+- original price
+- deal price
+- category
+- short notes (optional)
+
+Output:
+- conversion-focused description (150-250 words)
+- clean formatting (paragraph + bullet points)
+
+2) AI SEO Generator
+Input:
+- title
+- description
+- category
+
+Output:
+- SEO title (max 60 chars)
+- meta description (max 155 chars)
+- suggested keywords list
+
+3) AI Bullet Points Generator
+Input:
+- product title
+- category
+- short description
+
+Output:
+- 5-8 bullet points focusing on benefits + features
+
+4) AI Urgency/Hook Generator
+Input:
+- discount %
+- expiration date
+- slots remaining (optional)
+
+Output:
+- short hook text for banners and deal cards
+
+5) AI Social Media Generator
+Input:
+- deal title
+- discount %
+- short description
+- category
+
+Output:
+- 5 TikTok/Reels scripts (5-10 seconds each)
+- 10 caption options
+- 10 hashtag sets
+
+6) AI Email Blast Generator
+Input:
+- deal title
+- promo code
+- discount %
+- expiration date
+- affiliate link
+
+Output:
+- subject line ideas (10)
+- preview text ideas (5)
+- full email body (short version + long version)
+
+7) AI Push Notification Generator
+Input:
+- title
+- discount %
+- expiration date
+
+Output:
+- 10 push notification options (short + urgent)
+
+8) AI Tag + Category Suggestion
+Input:
+- title + description
+
+Output:
+- best matching category (from DB categories)
+- 10 tags/keywords
+
+------------------------------------------------------------
+UI REQUIREMENTS (ADMIN DASHBOARD)
+------------------------------------------------------------
+
+On /admin/deals/new and /admin/deals/[id]/edit:
+
+Add an "AI Tools" panel with buttons:
+
+- Generate Full Deal Description
+- Rewrite Description for Conversions
+- Rewrite Description for SEO
+- Generate Bullet Points
+- Generate SEO Title + Meta
+- Generate Social Media Captions
+- Generate Email Blast Copy
+- Generate Push Notification Copy
+- Suggest Category + Tags
+- Suggest Slug
+
+Each button triggers an API call and auto-fills the form fields.
+
+Add a "Copy to Clipboard" feature for:
+- social captions
+- email content
+- push notifications
+
+Display AI output in a clean modal or expandable panel.
+
+------------------------------------------------------------
+BACKEND REQUIREMENTS
+------------------------------------------------------------
+
+1) Create API route: /api/admin/ai
+- Only admin users can access it.
+- Accept JSON payload with:
+  - action: string
+  - dealData: object
+
+2) Use OpenAI API
+- Model: gpt-4o-mini or best cost-effective model available
+- Add OPENAI_API_KEY in .env
+
+3) AI Prompting Rules
+- Output MUST be JSON always.
+- Strictly enforce formatting:
+  - no markdown fences
+  - no extra commentary
+  - no random text outside JSON
+
+4) Rate limiting
+- Limit requests per admin user per minute
+- Also limit per IP
+
+5) Logging
+- Create DB table "AiLog"
+Fields:
+- id
+- userId
+- action
+- inputSummary
+- outputSummary
+- createdAt
+
+Store logs for admin review.
+
+------------------------------------------------------------
+DATABASE UPDATES (PRISMA)
+------------------------------------------------------------
+
+Add new model:
+
+model AiLog {
+  id            String   @id @default(cuid())
+  userId        String
+  action        String
+  inputSummary  String
+  outputSummary String
+  createdAt     DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+}
+
+------------------------------------------------------------
+ADMIN FORM UPDATES
+------------------------------------------------------------
+
+Add these fields to Deal model if not present:
+- seoTitle (String?)
+- metaDescription (String?)
+- tags (String[] or JSON)
+
+If Prisma doesn't support String[] cleanly for Postgres, use Json.
+
+Deal model should include:
+- seoTitle
+- metaDescription
+- tags
+
+------------------------------------------------------------
+AI OUTPUT FORMATS (MUST FOLLOW)
+------------------------------------------------------------
+
+For each action, AI must return JSON only.
+
+Example formats:
+
+A) Generate Description:
+{
+  "description": "...",
+  "bullets": ["...", "..."]
+}
+
+B) SEO Generator:
+{
+  "seoTitle": "...",
+  "metaDescription": "...",
+  "keywords": ["...", "..."]
+}
+
+C) Social Generator:
+{
+  "scripts": ["...", "..."],
+  "captions": ["...", "..."],
+  "hashtags": ["...", "..."]
+}
+
+D) Email Generator:
+{
+  "subjects": ["...", "..."],
+  "previewTexts": ["...", "..."],
+  "shortEmail": "...",
+  "longEmail": "..."
+}
+
+E) Push Generator:
+{
+  "pushNotifications": ["...", "..."]
+}
+
+F) Tag/Category Suggestion:
+{
+  "category": "electronics",
+  "tags": ["...", "..."],
+  "slugSuggestions": ["...", "..."]
+}
+
+------------------------------------------------------------
+SECURITY REQUIREMENTS
+------------------------------------------------------------
+
+- Only ADMIN role can use AI endpoints.
+- Validate payload with Zod.
+- Prevent prompt injection:
+  - do not accept raw prompt from client
+  - only accept structured deal fields
+- Strip HTML tags from inputs before sending to AI.
+
+------------------------------------------------------------
+DELIVERABLES
+------------------------------------------------------------
+
+Generate complete working code with:
+- Updated Prisma schema
+- Migration steps
+- OpenAI API integration
+- Admin UI panel
+- API route with strict JSON responses
+- Copy-to-clipboard UI
+- Logging to database
+- Rate limiting
+
+Do not output partial code. Output full files with exact file paths.
+
+Now implement this AI Content Assistant system in the project.
